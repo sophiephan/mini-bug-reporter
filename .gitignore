@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build output
+build/
+dist/
+dist-ssr/
+out/
+target/
+
+# React specific
+*.js
+*.jsx
+*.ts
+*.tsx
+*.map
+*.d.ts
+public/static/
+
+# Spring specific
+*.class
+*.jar
+*.war
+*.log
+*.iml
+
+# Ignore the bin directory
+/backend/bin/
+
+# Logs
+logs/
+*.log
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
