@@ -33,7 +33,6 @@ public/static/
 
 # Logs
 logs/
-*.log
 
 # Editor directories and files
 .vscode/*
@@ -45,3 +44,6 @@ logs/
 *.njsproj
 *.sln
 *.sw?
+
+# Gradle cache
+.gradle/
