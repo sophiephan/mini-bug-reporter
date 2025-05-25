@@ -1,49 +1,51 @@
-# Node modules
+# === General ===
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+
+# === Node.js ===
 node_modules/
-npm-debug.log
+npm-debug.log*
+yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# Build output
-build/
-dist/
-dist-ssr/
-out/
-target/
+# === Vite + React Frontend ===
+frontend/dist/
+frontend/.vite/
+frontend/public/static/
 
-# React specific
-*.js
-*.jsx
-*.ts
-*.tsx
-*.map
-*.d.ts
-public/static/
+# Optional: uncomment if using .env in frontend
+# frontend/.env
+# frontend/.env.*
 
-# Spring specific
+# === Java / Spring Boot Backend ===
+backend/target/
+/backend/bin/
 *.class
 *.jar
 *.war
-*.log
+
+# === Build tools ===
+.gradle/
+build/
+out/
+
+# === IDEs and Editors ===
+.idea/
+.vscode/
 *.iml
 
-# Ignore the bin directory
-/backend/bin/
+# === OS Generated ===
+*.DS_Store
+*.tmp
 
-# Logs
-logs/
+# === Docker ===
+**/Dockerfile
+**/.dockerignore
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea/
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Gradle cache
-.gradle/
+# === Test Reports / Coverage ===
+**/coverage/
+**/test-results/
+**/.nyc_output/
