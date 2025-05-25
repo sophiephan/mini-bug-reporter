@@ -12,7 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold text-gray-900">Bug Reporter</h1>
             <a 
-              href="https://github.com/yourusername/mini-bug-reporter" 
+              href="https://github.com/sophiephan/mini-bug-reporter"
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-500 hover:text-gray-700"
