@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: bug-reporter-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - bug-reporter-network
+
+  frontend:
+    build: ./frontend
+    container_name: bug-reporter-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - bug-reporter-network
+
+networks:
+  bug-reporter-network:
+    driver: bridge

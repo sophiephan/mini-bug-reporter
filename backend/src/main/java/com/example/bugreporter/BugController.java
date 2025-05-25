@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bugs")
-@CrossOrigin(origins = "http://localhost:5173") // Allow React dev server
+@CrossOrigin // Use CORS configuration from application properties
 public class BugController {
     
     @Autowired
