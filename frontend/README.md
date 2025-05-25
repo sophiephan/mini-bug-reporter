@@ -6,12 +6,36 @@ This is the frontend application for the Bug Reporter, built with React.
 
 The Bug Reporter frontend provides a user interface for reporting and tracking bugs. It communicates with the backend API to perform CRUD operations on bug reports.
 
+## Features
+
+- View a list of all bug reports
+- Submit new bug reports with title, description, and screenshot URL
+- Delete existing bug reports
+- Real-time feedback with loading states and error handling
+- Responsive design with Tailwind CSS
+
 ## Tech Stack
 
-- React
+- React 18
 - TypeScript
 - Vite
 - Tailwind CSS
+- Axios for API requests
+
+## Project Structure
+
+- `/src/components` - React components
+  - `BugForm.tsx` - Form for submitting new bug reports
+  - `BugList.tsx` - List of bug reports with delete functionality
+  - `Layout.tsx` - Layout component with header and footer
+- `/src/api` - API client functions
+  - `bugApi.ts` - Functions for interacting with the backend API
+- `/src/hooks` - Custom React hooks
+  - `useBugs.ts` - Hook for managing bug state and operations
+- `/src/types` - TypeScript type definitions
+  - `bug.ts` - Types for bug data models
+- `/src/utils` - Utility functions
+  - `dateUtils.ts` - Date formatting utilities
 
 ## Getting Started
 

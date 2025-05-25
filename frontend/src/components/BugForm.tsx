@@ -12,14 +12,18 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
+    // Reset validation errors
+    setValidationError(null);
+    
     // Validate form
     if (!title.trim()) {
-      setError('Title is required');
+      setValidationError('Title is required');
       return;
     }
 
@@ -89,6 +93,9 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
             placeholder="Brief description of the bug"
             required
           />
+          {validationError && (
+            <p className="mt-1 text-sm text-red-600">{validationError}</p>
+          )}
         </div>
         
         <div className="mb-4">

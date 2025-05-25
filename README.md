@@ -7,6 +7,14 @@ A full-stack application for reporting and tracking bugs in software projects.
 - `/frontend` - React frontend application
 - `/backend` - Spring Boot backend API
 
+## Features
+
+- Create, view, and delete bug reports
+- Track bug status (OPEN, IN_PROGRESS, CLOSED)
+- Add screenshots via URL
+- Responsive UI built with React and Tailwind CSS
+- RESTful API with Spring Boot
+
 ## Backend
 
 The backend is built with Spring Boot and provides a RESTful API for managing bug reports.
@@ -16,6 +24,8 @@ See [Backend README](./backend/README.md) for detailed information.
 ## Frontend
 
 The frontend is built with React and provides a user interface for interacting with the bug reporting system.
+
+See [Frontend README](./frontend/README.md) for detailed information.
 
 ## Getting Started
 
