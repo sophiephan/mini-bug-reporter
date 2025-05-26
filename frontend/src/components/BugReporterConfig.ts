@@ -1,8 +1,5 @@
 import type { BugPriority } from '../types/bug';
 
-// Define a union type for context values
-type ContextValue = string | number | boolean | null; // Add other types as needed
-
 export interface BugReporterOptions {
   // Feature toggles
   showDescription?: boolean;
@@ -13,7 +10,7 @@ export interface BugReporterOptions {
   defaultPriority?: BugPriority;
   
   // Custom context
-  getContextData?: () => Promise<Record<string, ContextValue>> | Record<string, ContextValue>;
+  getContextData?: () => Promise<Record<string, unknown>> | Record<string, unknown>;
   
   // API configuration
   apiEndpoint?: string;
