@@ -13,29 +13,20 @@ describe('BugList Component', () => {
     {
       id: 1,
       title: 'Test Bug 1',
-      description: 'This is test bug 1',
-      screenshotUrl: null,
+      description: 'Bug description',
+      screenshotUrl: 'https://example.com/screenshot.png',
       createdAt: '2023-01-01T12:00:00Z',
       status: 'OPEN',
-      priority: 'LOW'
+      priority: 'HIGH'
     },
     {
       id: 2,
       title: 'Test Bug 2',
       description: null,
-      screenshotUrl: 'https://example.com/screenshot.png',
+      screenshotUrl: null,
       createdAt: '2023-01-02T12:00:00Z',
       status: 'IN_PROGRESS',
       priority: 'MEDIUM'
-    },
-    {
-      id: 3,
-      title: 'Test Bug 3',
-      description: 'Critical bug that needs immediate attention',
-      screenshotUrl: null,
-      createdAt: '2023-01-03T12:00:00Z',
-      status: 'OPEN',
-      priority: 'CRITICAL'
     }
   ];
   
@@ -52,12 +43,16 @@ describe('BugList Component', () => {
     // Check that all bugs are rendered
     expect(screen.getByText('Test Bug 1')).toBeInTheDocument();
     expect(screen.getByText('Test Bug 2')).toBeInTheDocument();
-    expect(screen.getByText('Test Bug 3')).toBeInTheDocument();
     
-    // Check that priorities are displayed
-    expect(screen.getByText('LOW')).toBeInTheDocument();
+    // Check for bug 1 details
+    expect(screen.getByText('Bug description')).toBeInTheDocument();
+    expect(screen.getByText('View Screenshot')).toBeInTheDocument();
+    
+    // Check for status and priority badges
+    expect(screen.getByText('OPEN')).toBeInTheDocument();
+    expect(screen.getByText('IN PROGRESS')).toBeInTheDocument();
+    expect(screen.getByText('HIGH')).toBeInTheDocument();
     expect(screen.getByText('MEDIUM')).toBeInTheDocument();
-    expect(screen.getByText('CRITICAL')).toBeInTheDocument();
   });
   
   it('should display loading state', () => {
@@ -70,11 +65,12 @@ describe('BugList Component', () => {
       />
     );
     
+    expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
   
   it('should display error message', () => {
-    const errorMessage = 'Failed to load bugs';
+    const errorMessage = 'Failed to fetch bugs';
     renderWithProviders(
       <BugList 
         bugs={[]} 
@@ -135,5 +131,52 @@ describe('BugList Component', () => {
     await user.click(deleteButtons[0]);
     
     expect(onDeleteMock).toHaveBeenCalledWith(mockBugs[0].id);
+  });
+
+  it('renders bug with metadata correctly', () => {
+    const bugsWithMetadata: Bug[] = [
+      {
+        ...mockBugs[0],
+        metadata: {
+          reportedBy: 'user@example.com',
+          browser: 'Chrome',
+          appVersion: '1.2.3'
+        }
+      }
+    ];
+    
+    renderWithProviders(
+      <BugList 
+        bugs={bugsWithMetadata} 
+        loading={false} 
+        error={null} 
+        onDelete={mockOnDelete} 
+      />
+    );
+    
+    // Check if metadata section is rendered
+    expect(screen.getByText('Metadata')).toBeInTheDocument();
+    
+    // Check if metadata values are displayed
+    expect(screen.getByText(/reportedBy:/)).toBeInTheDocument();
+    expect(screen.getByText(/user@example.com/)).toBeInTheDocument();
+    expect(screen.getByText(/browser:/)).toBeInTheDocument();
+    expect(screen.getByText(/Chrome/)).toBeInTheDocument();
+    expect(screen.getByText(/appVersion:/)).toBeInTheDocument();
+    expect(screen.getByText(/1.2.3/)).toBeInTheDocument();
+  });
+  
+  it('does not render metadata section when bug has no metadata', () => {
+    renderWithProviders(
+      <BugList 
+        bugs={mockBugs} 
+        loading={false} 
+        error={null} 
+        onDelete={mockOnDelete} 
+      />
+    );
+    
+    // Metadata section should not be present
+    expect(screen.queryByText('Metadata')).not.toBeInTheDocument();
   });
 }); 

@@ -63,6 +63,11 @@ export const BugList = ({ bugs, loading, error, onDelete }: BugListProps) => {
     }
   };
 
+  // Helper to determine if a bug has metadata
+  const hasMetadata = (bug: Bug): boolean => {
+    return bug.metadata !== undefined && Object.keys(bug.metadata).length > 0;
+  };
+
   return (
     <div className="space-y-4">
       {bugs.map((bug) => (
@@ -104,6 +109,21 @@ export const BugList = ({ bugs, loading, error, onDelete }: BugListProps) => {
             >
               View Screenshot
             </a>
+          )}
+          
+          {/* Metadata display */}
+          {hasMetadata(bug) && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <h4 className="text-sm font-medium text-gray-700 mb-1">Metadata</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(bug.metadata!).map(([key, value]) => (
+                  <div key={key} className="text-xs">
+                    <span className="font-semibold">{key}:</span>{' '}
+                    <span className="text-gray-600">{String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       ))}

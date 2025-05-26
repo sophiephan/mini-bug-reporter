@@ -176,6 +176,7 @@ function MyApp() {
 | `showDescription` | boolean | `true` | Show/hide description field |
 | `showPriority` | boolean | `true` | Show/hide priority dropdown |
 | `showScreenshotUrl` | boolean | `true` | Show/hide screenshot URL field |
+| `showMetadataFields` | boolean | `false` | Show/hide custom metadata fields UI |
 | `defaultPriority` | string | `'MEDIUM'` | Default priority value |
 | `title` | string | `'Report a Bug'` | Form title |
 | `submitButtonText` | string | `'Submit Bug Report'` | Submit button text |
@@ -183,20 +184,37 @@ function MyApp() {
 | `apiEndpoint` | string | `'http://localhost:8080/api/bugs'` | API endpoint for submitting bugs |
 | `getContextData` | function | `undefined` | Function that returns additional context data |
 
-### Adding Context Data
+### Adding Metadata
 
-The `getContextData` option allows you to automatically include additional information with each bug report:
+There are two ways to add metadata to bug reports:
+
+#### 1. Custom Metadata UI Fields
+
+Enable the metadata UI fields to allow users to manually enter custom key-value pairs:
 
 ```tsx
 const options = {
-  getContextData: () => {
+  showMetadataFields: true
+};
+```
+
+This will add a "Custom Metadata" section to the form where users can:
+- Add any number of key-value pairs
+- Remove unwanted fields
+- Provide additional context that might be helpful for debugging
+
+#### 2. Automatic Context Data
+
+The `getContextData` option allows you to automatically include additional information with each bug report as metadata:
+
+```tsx
+const options = {
+  getContextData: async () => {
     // Can be async or return a plain object
     return {
       // User information
-      user: {
-        id: getUserId(),
-        email: getUserEmail()
-      },
+      reportedBy: getUserEmail(),
+      userId: getUserId(),
       
       // Environment information
       environment: process.env.NODE_ENV,
@@ -209,13 +227,54 @@ const options = {
       userAgent: navigator.userAgent,
       
       // Any other context that might be helpful
-      timestamp: new Date().toISOString()
+      timestamp: Date.now()
     };
   }
 };
 ```
 
-See `src/examples/BugReporterIntegration.tsx` for a complete example.
+##### Why Async Context Data?
+
+The `getContextData` function is designed to be async for several important reasons:
+
+1. **Flexibility for Real-World Use Cases**: Many real-world applications need to fetch context data asynchronously, such as:
+   - User details from an authentication service
+   - Application configuration from an API
+   - Analytics data that might require asynchronous processing
+
+2. **Error Handling**: Async functions with try/catch blocks provide a clean way to handle errors during context data collection, ensuring the form submission can still proceed even if metadata collection fails.
+
+3. **Performance**: For expensive operations, async allows these to run without blocking the main thread, creating a better user experience.
+
+4. **Future-Proofing**: By supporting async from the start, you won't need to change your interface later when you need to add asynchronous operations.
+
+#### Combining Both Approaches
+
+You can combine both approaches to allow users to add their own metadata while also automatically including system context:
+
+```tsx
+const options = {
+  showMetadataFields: true,
+  getContextData: () => ({
+    reportedBy: getUserEmail(),
+    appVersion: '1.2.3',
+    environment: process.env.NODE_ENV
+  })
+};
+```
+
+When both are used, the metadata is merged, with manually entered fields taking precedence if there are any key conflicts.
+
+### Viewing Metadata
+
+Bug reports that include metadata will display this information in the bug list view. Each metadata key-value pair is shown in a structured format, making it easy to see important contextual information at a glance.
+
+The metadata display automatically:
+- Shows a "Metadata" section only when metadata is present
+- Formats the key-value pairs in a clean, readable layout
+- Handles different types of metadata values (strings, numbers, booleans)
+
+This makes it easy to diagnose issues by seeing all relevant context about the bug report in one place.
 
 ## Testing Your Integration
 
@@ -245,10 +304,10 @@ npm run test:watch
    - [ ] Success message appears after submission
    - [ ] Error handling works when API fails
 
-2. **Custom Context Data**:
-   - [ ] Verify that custom context data is included in API requests
-   - [ ] Check that user information is correctly captured
-   - [ ] Confirm that page/route information is accurate
+2. **Custom Metadata**:
+   - [ ] Verify that custom metadata fields can be added and removed
+   - [ ] Check that metadata values are included in API requests
+   - [ ] Test that automatically collected context data is merged correctly
 
 3. **UI Customization**:
    - [ ] Custom title appears correctly

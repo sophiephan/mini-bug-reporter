@@ -259,3 +259,75 @@ CREATE TABLE bug_metadata (
 2. **Metadata Usage**: Use metadata for flexible context data rather than modifying the core schema
 3. **Authentication**: When deployed in production, secure the API with appropriate authentication
 4. **Data Privacy**: Be mindful of what user data is included in bug reports 
+
+## Working with Metadata
+
+The Bug Reporter API supports flexible metadata for bug reports, which allows you to include any additional context data without modifying the core schema.
+
+### Structure
+
+Metadata is stored as key-value pairs associated with each bug:
+
+```json
+{
+  "title": "Button not working",
+  "description": "The submit button doesn't respond when clicked",
+  "priority": "HIGH",
+  "metadata": {
+    "reportedBy": "user@example.com",
+    "appVersion": "1.2.3",
+    "browser": "Chrome 118.0.0.0",
+    "os": "Windows 11",
+    "customField": "Any string, number, boolean, or null value"
+  }
+}
+```
+
+### Metadata Value Types
+
+The system supports the following types of metadata values:
+- String
+- Number
+- Boolean
+- Null
+
+Complex objects and arrays are not directly supported in metadata values. If you need to store complex data, consider serializing it to a string (e.g., using JSON.stringify()).
+
+### Adding Metadata via Frontend
+
+The frontend component provides a convenient way to add metadata through the `getContextData` option:
+
+```tsx
+<BugReporter 
+  options={{
+    getContextData: () => {
+      // This can be sync or async
+      return {
+        reportedBy: getCurrentUser().email,
+        appVersion: APP_VERSION,
+        currentRoute: window.location.pathname
+      };
+    }
+  }} 
+/>
+```
+
+This context data is automatically included as metadata with each bug report.
+
+### Querying Bugs by Metadata
+
+You can search for bugs with specific metadata values using the API:
+
+```
+GET /api/bugs?metadata.reportedBy=user@example.com
+```
+
+This will return all bugs where the metadata contains a "reportedBy" key with the value "user@example.com".
+
+### Best Practices for Metadata
+
+1. **Use consistent keys**: Establish naming conventions for metadata keys to ensure consistency
+2. **Include valuable context**: Add metadata that helps with debugging and categorization
+3. **Avoid sensitive data**: Don't include personal or sensitive data in metadata
+4. **Keep values simple**: Prefer simple scalar values over complex structures
+5. **Document metadata keys**: Maintain documentation of the metadata keys your application uses 

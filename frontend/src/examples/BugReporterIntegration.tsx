@@ -22,23 +22,10 @@ export const BugReporterIntegration: React.FC = () => {
     // Automatically include user context with each bug report
     getContextData: () => {
       return {
-        // User information from your app's auth system
-        reportedBy: {
-          userId: '12345',
-          email: 'user@example.com',
-          role: 'customer'
-        },
-        
-        // Page/route information
+        reportedBy: 'user@example.com',
         sourcePage: window.location.pathname,
-        
-        // App version
         appVersion: '1.2.3',
-        
-        // Browser information
         userAgent: navigator.userAgent,
-        
-        // Timestamp
         reportedAt: new Date().toISOString()
       };
     }
