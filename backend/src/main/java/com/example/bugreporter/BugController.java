@@ -1,51 +1,69 @@
 package com.example.bugreporter;
 
+import com.example.bugreporter.service.BugService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bugs")
 @CrossOrigin // Use CORS configuration from application properties
 public class BugController {
     
+    private final BugService bugService;
+    
     @Autowired
-    private BugRepository bugRepository;
+    public BugController(BugService bugService) {
+        this.bugService = bugService;
+    }
     
     @GetMapping
     public List<Bug> getAllBugs() {
-        return bugRepository.findAllByOrderByCreatedAtDesc();
+        return bugService.getAllBugs();
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<Bug> getBugById(@PathVariable Long id) {
-        Optional<Bug> bug = bugRepository.findById(id);
-        return bug.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return bugService.getBugById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     public Bug createBug(@RequestBody CreateBugRequest request) {
         Bug bug = new Bug(request.getTitle(), request.getDescription(), request.getScreenshotUrl());
-        return bugRepository.save(bug);
+        
+        if (request.getPriority() != null) {
+            bug.setPriority(request.getPriority());
+        }
+        
+        return bugService.createBug(bug);
     }
     
     @PutMapping("/{id}/status")
     public ResponseEntity<Bug> updateBugStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest request) {
-        Optional<Bug> optionalBug = bugRepository.findById(id);
-        if (optionalBug.isPresent()) {
-            Bug bug = optionalBug.get();
-            bug.setStatus(request.getStatus());
-            return ResponseEntity.ok(bugRepository.save(bug));
-        }
-        return ResponseEntity.notFound().build();
+        Bug bugUpdate = new Bug();
+        bugUpdate.setStatus(request.getStatus());
+        
+        return bugService.updateBug(id, bugUpdate)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @PutMapping("/{id}/priority")
+    public ResponseEntity<Bug> updateBugPriority(@PathVariable Long id, @RequestBody UpdatePriorityRequest request) {
+        Bug bugUpdate = new Bug();
+        bugUpdate.setPriority(request.getPriority());
+        
+        return bugService.updateBug(id, bugUpdate)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBug(@PathVariable Long id) {
-        if (bugRepository.existsById(id)) {
-            bugRepository.deleteById(id);
+        if (bugService.deleteBug(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -56,6 +74,7 @@ public class BugController {
         private String title;
         private String description;
         private String screenshotUrl;
+        private Bug.Priority priority;
         
         // Getters and Setters
         public String getTitle() { return title; }
@@ -66,6 +85,9 @@ public class BugController {
         
         public String getScreenshotUrl() { return screenshotUrl; }
         public void setScreenshotUrl(String screenshotUrl) { this.screenshotUrl = screenshotUrl; }
+        
+        public Bug.Priority getPriority() { return priority; }
+        public void setPriority(Bug.Priority priority) { this.priority = priority; }
     }
     
     public static class UpdateStatusRequest {
@@ -73,5 +95,12 @@ public class BugController {
         
         public Bug.Status getStatus() { return status; }
         public void setStatus(Bug.Status status) { this.status = status; }
+    }
+    
+    public static class UpdatePriorityRequest {
+        private Bug.Priority priority;
+        
+        public Bug.Priority getPriority() { return priority; }
+        public void setPriority(Bug.Priority priority) { this.priority = priority; }
     }
 }

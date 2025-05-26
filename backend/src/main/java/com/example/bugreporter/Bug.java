@@ -24,8 +24,16 @@ public class Bug {
     @Enumerated(EnumType.STRING)
     private Status status = Status.OPEN;
     
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority = Priority.MEDIUM;
+    
     public enum Status {
         OPEN, IN_PROGRESS, CLOSED
+    }
+    
+    public enum Priority {
+        LOW, MEDIUM, HIGH, CRITICAL
     }
     
     // Default constructor
@@ -39,6 +47,12 @@ public class Bug {
         this.title = title;
         this.description = description;
         this.screenshotUrl = screenshotUrl;
+    }
+    
+    // Full constructor
+    public Bug(String title, String description, String screenshotUrl, Priority priority) {
+        this(title, description, screenshotUrl);
+        this.priority = priority;
     }
     
     // Getters and Setters
@@ -59,4 +73,7 @@ public class Bug {
     
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    
+    public Priority getPriority() { return priority; }
+    public void setPriority(Priority priority) { this.priority = priority; }
 }

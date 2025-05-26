@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16
+    container_name: bug-reporter-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=bugreporter
+      - POSTGRES_USER=buguser
+      - POSTGRES_PASSWORD=bugpassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buguser -d bugreporter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bug-reporter-network
+
   backend:
     build: ./backend
     container_name: bug-reporter-backend
@@ -8,6 +28,9 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - bug-reporter-network
 
@@ -24,3 +47,7 @@ services:
 networks:
   bug-reporter-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

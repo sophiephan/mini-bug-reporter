@@ -1,5 +1,6 @@
 package com.example.bugreporter;
 
+import com.example.bugreporter.service.BugService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class BugControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private BugRepository bugRepository;
+    private BugService bugService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -37,7 +38,7 @@ public class BugControllerTest {
         Bug bug2 = new Bug("Bug 2", "Description 2", "screenshot.png");
         List<Bug> bugs = Arrays.asList(bug1, bug2);
         
-        when(bugRepository.findAllByOrderByCreatedAtDesc()).thenReturn(bugs);
+        when(bugService.getAllBugs()).thenReturn(bugs);
         
         // When & Then
         mockMvc.perform(get("/api/bugs"))
@@ -47,7 +48,7 @@ public class BugControllerTest {
                 .andExpect(jsonPath("$[1].title", is("Bug 2")))
                 .andExpect(jsonPath("$[1].screenshotUrl", is("screenshot.png")));
                 
-        verify(bugRepository, times(1)).findAllByOrderByCreatedAtDesc();
+        verify(bugService, times(1)).getAllBugs();
     }
     
     @Test
@@ -56,8 +57,8 @@ public class BugControllerTest {
         Bug bug = new Bug("Test Bug", "Description", null);
         bug.setId(1L);
         
-        when(bugRepository.findById(1L)).thenReturn(Optional.of(bug));
-        when(bugRepository.findById(2L)).thenReturn(Optional.empty());
+        when(bugService.getBugById(1L)).thenReturn(Optional.of(bug));
+        when(bugService.getBugById(2L)).thenReturn(Optional.empty());
         
         // When & Then - Existing bug
         mockMvc.perform(get("/api/bugs/1"))
@@ -69,8 +70,8 @@ public class BugControllerTest {
         mockMvc.perform(get("/api/bugs/2"))
                 .andExpect(status().isNotFound());
                 
-        verify(bugRepository, times(1)).findById(1L);
-        verify(bugRepository, times(1)).findById(2L);
+        verify(bugService, times(1)).getBugById(1L);
+        verify(bugService, times(1)).getBugById(2L);
     }
     
     @Test
@@ -84,7 +85,7 @@ public class BugControllerTest {
         Bug savedBug = new Bug("New Bug", "New Description", "new-screenshot.png");
         savedBug.setId(1L);
         
-        when(bugRepository.save(any(Bug.class))).thenReturn(savedBug);
+        when(bugService.createBug(any(Bug.class))).thenReturn(savedBug);
         
         // When & Then
         mockMvc.perform(post("/api/bugs")
@@ -94,25 +95,21 @@ public class BugControllerTest {
                 .andExpect(jsonPath("$.title", is("New Bug")))
                 .andExpect(jsonPath("$.id", is(1)));
                 
-        verify(bugRepository, times(1)).save(any(Bug.class));
+        verify(bugService, times(1)).createBug(any(Bug.class));
     }
     
     @Test
     public void testUpdateBugStatus() throws Exception {
         // Given
-        Bug bug = new Bug("Test Bug", "Description", null);
-        bug.setId(1L);
-        
-        BugController.UpdateStatusRequest request = new BugController.UpdateStatusRequest();
-        request.setStatus(Bug.Status.IN_PROGRESS);
-        
         Bug updatedBug = new Bug("Test Bug", "Description", null);
         updatedBug.setId(1L);
         updatedBug.setStatus(Bug.Status.IN_PROGRESS);
         
-        when(bugRepository.findById(1L)).thenReturn(Optional.of(bug));
-        when(bugRepository.findById(2L)).thenReturn(Optional.empty());
-        when(bugRepository.save(any(Bug.class))).thenReturn(updatedBug);
+        BugController.UpdateStatusRequest request = new BugController.UpdateStatusRequest();
+        request.setStatus(Bug.Status.IN_PROGRESS);
+        
+        when(bugService.updateBug(eq(1L), any(Bug.class))).thenReturn(Optional.of(updatedBug));
+        when(bugService.updateBug(eq(2L), any(Bug.class))).thenReturn(Optional.empty());
         
         // When & Then - Existing bug
         mockMvc.perform(put("/api/bugs/1/status")
@@ -127,17 +124,15 @@ public class BugControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
                 
-        verify(bugRepository, times(1)).findById(1L);
-        verify(bugRepository, times(1)).findById(2L);
-        verify(bugRepository, times(1)).save(any(Bug.class));
+        verify(bugService, times(1)).updateBug(eq(1L), any(Bug.class));
+        verify(bugService, times(1)).updateBug(eq(2L), any(Bug.class));
     }
     
     @Test
     public void testDeleteBug() throws Exception {
         // Given
-        when(bugRepository.existsById(1L)).thenReturn(true);
-        when(bugRepository.existsById(2L)).thenReturn(false);
-        doNothing().when(bugRepository).deleteById(any(Long.class));
+        when(bugService.deleteBug(1L)).thenReturn(true);
+        when(bugService.deleteBug(2L)).thenReturn(false);
         
         // When & Then - Existing bug
         mockMvc.perform(delete("/api/bugs/1"))
@@ -147,8 +142,7 @@ public class BugControllerTest {
         mockMvc.perform(delete("/api/bugs/2"))
                 .andExpect(status().isNotFound());
                 
-        verify(bugRepository, times(1)).existsById(1L);
-        verify(bugRepository, times(1)).existsById(2L);
-        verify(bugRepository, times(1)).deleteById(1L);
+        verify(bugService, times(1)).deleteBug(1L);
+        verify(bugService, times(1)).deleteBug(2L);
     }
 } 

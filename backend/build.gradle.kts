@@ -15,12 +15,24 @@ repositories {
     mavenCentral()
 }
 
+extra["testcontainersVersion"] = "1.19.3"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.h2database:h2")
+    implementation("org.postgresql:postgresql")
+    implementation("org.flywaydb:flyway-core")
+    
+    // Keep H2 for tests and local development
+    runtimeOnly("com.h2database:h2")
+    
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    
+    // TestContainers
+    testImplementation(platform("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
 }
 
 tasks.test {
