@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bugs")
@@ -38,6 +39,13 @@ public class BugController {
             bug.setPriority(request.getPriority());
         }
         
+        // Handle custom metadata fields
+        if (request.getMetadata() != null && !request.getMetadata().isEmpty()) {
+            for (Map.Entry<String, String> entry : request.getMetadata().entrySet()) {
+                bug.addMetadata(entry.getKey(), entry.getValue());
+            }
+        }
+        
         return bugService.createBug(bug);
     }
     
@@ -61,6 +69,19 @@ public class BugController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    @PutMapping("/{id}/metadata")
+    public ResponseEntity<Bug> updateBugMetadata(@PathVariable Long id, @RequestBody Map<String, String> metadata) {
+        return bugService.getBugById(id)
+                .map(bug -> {
+                    // Update metadata
+                    for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                        bug.addMetadata(entry.getKey(), entry.getValue());
+                    }
+                    return ResponseEntity.ok(bugService.createBug(bug));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBug(@PathVariable Long id) {
         if (bugService.deleteBug(id)) {
@@ -75,6 +96,7 @@ public class BugController {
         private String description;
         private String screenshotUrl;
         private Bug.Priority priority;
+        private Map<String, String> metadata;
         
         // Getters and Setters
         public String getTitle() { return title; }
@@ -88,6 +110,9 @@ public class BugController {
         
         public Bug.Priority getPriority() { return priority; }
         public void setPriority(Bug.Priority priority) { this.priority = priority; }
+        
+        public Map<String, String> getMetadata() { return metadata; }
+        public void setMetadata(Map<String, String> metadata) { this.metadata = metadata; }
     }
     
     public static class UpdateStatusRequest {

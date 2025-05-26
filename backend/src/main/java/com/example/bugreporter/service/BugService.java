@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -57,6 +58,12 @@ public class BugService {
                     }
                     if (bugDetails.getPriority() != null) {
                         existingBug.setPriority(bugDetails.getPriority());
+                    }
+                    // Update metadata if present
+                    if (bugDetails.getMetadata() != null && !bugDetails.getMetadata().isEmpty()) {
+                        for (Map.Entry<String, String> entry : bugDetails.getMetadata().entrySet()) {
+                            existingBug.addMetadata(entry.getKey(), entry.getValue());
+                        }
                     }
                     return bugRepository.save(existingBug);
                 });

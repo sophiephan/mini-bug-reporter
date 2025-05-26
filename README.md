@@ -138,6 +138,24 @@ This will:
 
 The backend API will also be directly accessible at http://localhost:8080/api/bugs
 
+### Standalone Backend Deployment
+
+For cases where you only need the backend service (e.g., when integrating with your own frontend), you can use the standalone Docker Compose file:
+
+```
+docker-compose -f docker-compose.standalone.yml up --build
+```
+
+This will:
+1. Create a PostgreSQL database container with persistent volume
+2. Build and start only the backend container
+3. Make the backend API available at http://localhost:8080/api/bugs
+
+To stop the services:
+```
+docker-compose -f docker-compose.standalone.yml down
+```
+
 ### Database Connection Details
 
 When running with Docker Compose:
@@ -210,3 +228,112 @@ Useful commands:
 - `\dt`: List tables
 - `\d bugs`: Describe the bugs table
 - `SELECT * FROM flyway_schema_history;`: View migration history
+
+## Integrating Mini Bug Reporter with Your Existing Application
+
+The Mini Bug Reporter is designed to be easily integrated into existing web applications while maintaining flexibility and reusability.
+
+### Integration Options
+
+You have two main options for integrating Mini Bug Reporter:
+
+#### Option 1: Frontend Integration Only
+
+Use only the frontend component with your existing backend:
+
+1. Copy the necessary frontend files to your project:
+   - `frontend/src/components/BugReporter.tsx`
+   - `frontend/src/components/BugReporterConfig.ts`
+   - `frontend/src/types/bug.ts` (or just the types you need)
+
+2. Configure the Bug Reporter to send reports to your existing API:
+   ```tsx
+   <BugReporter 
+     options={{
+       apiEndpoint: 'https://your-api.example.com/bugs',
+       // Other configuration options...
+     }} 
+   />
+   ```
+
+3. Handle the bug reports in your existing backend by creating an endpoint that accepts the bug report data.
+
+#### Option 2: Full Stack Integration
+
+Use both the frontend component and the backend service:
+
+1. Follow the frontend integration steps above.
+
+2. Deploy the Mini Bug Reporter backend as a separate service:
+   - Configure CORS to allow requests from your main application
+   - Set up a dedicated database or use your existing database
+
+3. Point your frontend Bug Reporter component to this backend service.
+
+### Customizing the Bug Reporter
+
+#### Frontend Customization
+
+The Bug Reporter component is highly configurable:
+
+```tsx
+const options = {
+  // Feature toggles
+  showDescription: true,
+  showPriority: false,
+  showScreenshotUrl: false,
+  
+  // UI customization
+  title: 'Report an Issue',
+  submitButtonText: 'Send Report',
+  
+  // Automatically include context data
+  getContextData: () => ({
+    reportedBy: getUserEmail(),
+    sourcePage: window.location.pathname,
+    appVersion: '1.2.3'
+  })
+};
+
+<BugReporter options={options} />
+```
+
+See the [Frontend README](./frontend/README.md) for detailed configuration options.
+
+#### Backend Customization
+
+The backend supports custom metadata for each bug report:
+
+```json
+{
+  "title": "Button not working",
+  "description": "The submit button doesn't respond when clicked",
+  "priority": "HIGH",
+  "metadata": {
+    "reportedBy": "user@example.com",
+    "sourcePage": "/dashboard",
+    "appVersion": "1.2.3"
+  }
+}
+```
+
+See the [Backend README](./backend/README.md) for details on integrating with your existing backend.
+
+### Testing Your Integration
+
+1. **Frontend Testing**:
+   ```bash
+   cd frontend
+   npm test
+   ```
+
+2. **Backend Testing**:
+   ```bash
+   cd backend
+   ./gradlew test
+   ```
+
+3. **End-to-End Testing**:
+   - Start both frontend and backend
+   - Submit test bug reports
+   - Verify they appear in the database

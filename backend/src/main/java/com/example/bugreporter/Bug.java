@@ -2,6 +2,8 @@ package com.example.bugreporter;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "bugs")
@@ -27,6 +29,14 @@ public class Bug {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority = Priority.MEDIUM;
+    
+    // Add support for custom metadata fields
+    @ElementCollection
+    @CollectionTable(name = "bug_metadata", 
+                    joinColumns = @JoinColumn(name = "bug_id"))
+    @MapKeyColumn(name = "metadata_key")
+    @Column(name = "metadata_value")
+    private Map<String, String> metadata = new HashMap<>();
     
     public enum Status {
         OPEN, IN_PROGRESS, CLOSED
@@ -76,4 +86,15 @@ public class Bug {
     
     public Priority getPriority() { return priority; }
     public void setPriority(Priority priority) { this.priority = priority; }
+    
+    public Map<String, String> getMetadata() { return metadata; }
+    public void setMetadata(Map<String, String> metadata) { this.metadata = metadata; }
+    
+    // Helper method to add a single metadata entry
+    public void addMetadata(String key, String value) {
+        if (this.metadata == null) {
+            this.metadata = new HashMap<>();
+        }
+        this.metadata.put(key, value);
+    }
 }

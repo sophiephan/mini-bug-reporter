@@ -2,6 +2,7 @@ package com.example.bugreporter;
 
 import com.example.bugreporter.service.BugService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -9,12 +10,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -144,5 +147,84 @@ public class BugControllerTest {
                 
         verify(bugService, times(1)).deleteBug(1L);
         verify(bugService, times(1)).deleteBug(2L);
+    }
+
+    @Test
+    public void testCreateBugWithMetadata() throws Exception {
+        // Create a bug with metadata
+        Bug bug = new Bug("Test Bug", "Description", null);
+        bug.setId(1L);
+        bug.setCreatedAt(LocalDateTime.now());
+        bug.setPriority(Bug.Priority.HIGH);
+        
+        // Add metadata
+        bug.addMetadata("reportedBy", "test@example.com");
+        bug.addMetadata("sourcePage", "/dashboard");
+        
+        when(bugService.createBug(any(Bug.class))).thenReturn(bug);
+        
+        // Create request body
+        ObjectNode requestBody = objectMapper.createObjectNode();
+        requestBody.put("title", "Test Bug");
+        requestBody.put("description", "Description");
+        requestBody.put("priority", "HIGH");
+        
+        // Add metadata to request
+        ObjectNode metadata = requestBody.putObject("metadata");
+        metadata.put("reportedBy", "test@example.com");
+        metadata.put("sourcePage", "/dashboard");
+        
+        // Perform the request
+        mockMvc.perform(post("/api/bugs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Test Bug"))
+                .andExpect(jsonPath("$.priority").value("HIGH"));
+        
+        // Verify that the service was called with the correct metadata
+        verify(bugService).createBug(argThat(createdBug -> 
+            createdBug.getTitle().equals("Test Bug") &&
+            createdBug.getMetadata().get("reportedBy").equals("test@example.com") &&
+            createdBug.getMetadata().get("sourcePage").equals("/dashboard")
+        ));
+    }
+
+    @Test
+    public void testUpdateBugMetadata() throws Exception {
+        // Create a bug with initial metadata
+        Bug bug = new Bug("Test Bug", "Description", null);
+        bug.setId(1L);
+        bug.setCreatedAt(LocalDateTime.now());
+        
+        // Add initial metadata
+        bug.addMetadata("initialKey", "initialValue");
+        
+        // Create updated bug with new metadata
+        Bug updatedBug = new Bug("Test Bug", "Description", null);
+        updatedBug.setId(1L);
+        updatedBug.setCreatedAt(bug.getCreatedAt());
+        updatedBug.addMetadata("initialKey", "initialValue");
+        updatedBug.addMetadata("newKey", "newValue");
+        
+        when(bugService.getBugById(1L)).thenReturn(Optional.of(bug));
+        when(bugService.createBug(any(Bug.class))).thenReturn(updatedBug);
+        
+        // Create metadata update request
+        ObjectNode metadata = objectMapper.createObjectNode();
+        metadata.put("newKey", "newValue");
+        
+        // Perform the request
+        mockMvc.perform(put("/api/bugs/1/metadata")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(metadata.toString()))
+                .andExpect(status().isOk());
+        
+        // Verify that the service was called with the correct metadata
+        verify(bugService).createBug(argThat(savedBug -> 
+            savedBug.getMetadata().get("initialKey").equals("initialValue") &&
+            savedBug.getMetadata().get("newKey").equals("newValue")
+        ));
     }
 } 
