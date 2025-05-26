@@ -3,7 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useBugs } from './useBugs';
 import * as bugApi from '../api/bugApi';
 import { mockBugs } from '../test/mocks/handlers';
-import type { CreateBugRequest } from '../types/bug';
+import type {Bug, CreateBugRequest} from '../types/bug';
 
 // Mock the API module
 vi.mock('../api/bugApi', () => ({
@@ -51,13 +51,14 @@ describe('useBugs Hook', () => {
   it('should add a new bug', async () => {
     vi.mocked(bugApi.fetchBugs).mockResolvedValue(mockBugs);
     
-    const newBug = {
+    const newBug: Bug = {
       id: 4,
       title: 'New Bug',
       description: 'New bug description',
       screenshotUrl: null,
       createdAt: '2023-06-20T10:00:00',
-      status: 'OPEN' as const
+      status: 'OPEN' as const,
+      priority: 'MEDIUM'
     };
     
     const createBugRequest: CreateBugRequest = {

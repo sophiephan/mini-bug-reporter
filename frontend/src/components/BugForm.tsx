@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { CreateBugRequest } from '../types/bug';
+import type { CreateBugRequest, BugPriority } from '../types/bug';
 
 interface BugFormProps {
   onSubmit: (bug: CreateBugRequest) => Promise<boolean>;
@@ -10,6 +10,7 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [priority, setPriority] = useState<BugPriority>('MEDIUM');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
       
       const newBug: CreateBugRequest = {
         title: title.trim(),
+        priority
       };
       
       if (description.trim()) {
@@ -51,6 +53,7 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
         setTitle('');
         setDescription('');
         setScreenshotUrl('');
+        setPriority('MEDIUM');
         
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(false), 3000);
@@ -110,6 +113,23 @@ export const BugForm = ({ onSubmit }: BugFormProps) => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             placeholder="Detailed information about the bug"
           />
+        </div>
+        
+        <div className="mb-4">
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+            Priority
+          </label>
+          <select
+            id="priority"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as BugPriority)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
         </div>
         
         <div className="mb-4">

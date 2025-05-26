@@ -48,6 +48,21 @@ export const BugList = ({ bugs, loading, error, onDelete }: BugListProps) => {
     }
   };
 
+  const getPriorityColor = (priority: Bug['priority']) => {
+    switch (priority) {
+      case 'LOW':
+        return 'bg-blue-100 text-blue-800';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'CRITICAL':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <div className="space-y-4">
       {bugs.map((bug) => (
@@ -62,6 +77,9 @@ export const BugList = ({ bugs, loading, error, onDelete }: BugListProps) => {
             <div className="flex items-center space-x-2">
               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(bug.status)}`}>
                 {bug.status.replace('_', ' ')}
+              </span>
+              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(bug.priority)}`}>
+                {bug.priority}
               </span>
               <button
                 onClick={() => onDelete(bug.id)}

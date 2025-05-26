@@ -12,7 +12,7 @@ A full-stack application for reporting and tracking bugs in software projects.
 
 - Create, view, and delete bug reports
 - Track bug status (OPEN, IN_PROGRESS, CLOSED)
-- Set bug priority (LOW, MEDIUM, HIGH, CRITICAL)
+- Set and display bug priority (LOW, MEDIUM, HIGH, CRITICAL)
 - Add screenshots via URL
 - Responsive UI built with React and Tailwind CSS
 - RESTful API with Spring Boot

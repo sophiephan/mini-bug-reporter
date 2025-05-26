@@ -10,7 +10,8 @@ export const mockBugs: Bug[] = [
     description: 'The submit button does not respond when clicked',
     screenshotUrl: 'https://example.com/screenshot1.png',
     createdAt: '2023-06-15T10:30:00',
-    status: 'OPEN'
+    status: 'OPEN',
+    priority: 'MEDIUM'
   },
   {
     id: 2,
@@ -18,7 +19,8 @@ export const mockBugs: Bug[] = [
     description: 'Form submits even with invalid data',
     screenshotUrl: null,
     createdAt: '2023-06-16T14:20:00',
-    status: 'IN_PROGRESS'
+    status: 'IN_PROGRESS',
+    priority: 'LOW'
   },
   {
     id: 3,
@@ -26,7 +28,8 @@ export const mockBugs: Bug[] = [
     description: null,
     screenshotUrl: 'https://example.com/screenshot2.png',
     createdAt: '2023-06-17T09:15:00',
-    status: 'CLOSED'
+    status: 'CLOSED',
+    priority: 'HIGH'
   }
 ];
 
@@ -54,6 +57,7 @@ export const handlers = [
       description: newBug.description || null,
       screenshotUrl: newBug.screenshotUrl || null,
       createdAt: new Date().toISOString(),
+      priority: newBug.priority ?? 'MEDIUM',
       status: 'OPEN'
     };
     
